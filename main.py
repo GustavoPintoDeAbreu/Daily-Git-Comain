@@ -1,7 +1,9 @@
+import os
 import yaml
 from datetime import datetime
 from git import Repo
 
+REPO_DIR: str = os.path.dirname(os.path.abspath(__file__))
 FILE_TO_COMMIT_NAME: str = 'update_me.yaml'
 
 def update_file_to_commit():
@@ -22,5 +24,6 @@ def commit_repository(YAML_FILE):
     origin = repo.remote('origin')
     origin.push()
 
-if __name__ == '__main__': 
+if __name__ == '__main__':
+    os.chdir(REPO_DIR)
     commit_repository(update_file_to_commit())
