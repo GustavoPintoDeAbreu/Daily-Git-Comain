@@ -1,0 +1,12 @@
+# What this repo is to the rest of the lab. Read by labwatch's catalog (agents
+# query it through the lab MCP). Never put addresses, ports, hosts or secrets
+# here: refer to services by id.
+product: daily-git
+name: Daily-Git
+summary: "Keeps a GitHub contribution streak alive: on GUI login it makes 1-10 spaced-out commits that bump a counter in update_me.yaml."
+repo: GustavoPintoDeAbreu/Daily-Git-Comain
+runs:
+  - {host: pc, kind: manual, name: "XDG autostart (daily_runner.py)"}
+uses: [host.pc]
+docs:
+  - {topic: "how it works", path: README.md}
