@@ -1,8 +1,9 @@
 """
-daily_runner.py — runs on login, makes 1–10 commits staggered with
-uneven random intervals so they don't look scripted.
+daily_runner.py — runs on login and from a daily systemd user timer, makes
+1–10 commits staggered with uneven random intervals so they don't look scripted.
 """
 
+import fcntl
 import os
 import random
 import time
@@ -13,6 +14,7 @@ from pathlib import Path
 # ── Paths ──────────────────────────────────────────────────────────────────────
 REPO_DIR = Path(__file__).parent.resolve()
 LOCK_FILE = Path('/tmp/daily-git-commit.lock')
+RUN_LOCK  = Path('/tmp/daily-git-commit.running')
 LOG_DIR   = Path.home() / '.local' / 'share' / 'daily-git-commit'
 LOG_FILE  = LOG_DIR / 'log.txt'
 
@@ -23,8 +25,9 @@ logging.basicConfig(
     format='%(asctime)s  %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S',
     handlers=[
+        # Only the file: the launcher already sends stdout/stderr to log.txt,
+        # so a StreamHandler would write every line twice.
         logging.FileHandler(LOG_FILE),
-        logging.StreamHandler(),
     ]
 )
 log = logging.getLogger(__name__)
@@ -66,6 +69,15 @@ def main():
 
     if already_ran_today():
         log.info("Already ran today — exiting.")
+        return
+
+    # The login autostart and the timer can both fire on the same day; the
+    # first one holds this lock until it finishes, the second exits.
+    run_lock = open(RUN_LOCK, 'w')
+    try:
+        fcntl.flock(run_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        log.info("Another run is in progress — exiting.")
         return
 
     # Import here so the venv path is already active at this point

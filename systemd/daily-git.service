@@ -1,0 +1,8 @@
+[Unit]
+Description=Daily-Git: today's commits (skips if the login run already did them)
+
+[Service]
+Type=oneshot
+ExecStart=%h/.local/bin/daily-git-commit.sh
+# A run sleeps between commits for up to several hours.
+TimeoutStartSec=infinity
