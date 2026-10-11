@@ -3,10 +3,11 @@
 # here: refer to services by id.
 product: daily-git
 name: Daily-Git
-summary: "Keeps a GitHub contribution streak alive: on GUI login it makes 1-10 spaced-out commits that bump a counter in update_me.yaml."
+summary: "Keeps a GitHub contribution streak alive: on GUI login (or the daily 10:00 timer) it makes 1-10 spaced-out commits that bump a counter in update_me.yaml."
 repo: GustavoPintoDeAbreu/Daily-Git-Comain
 runs:
   - {host: pc, kind: manual, name: "XDG autostart (daily_runner.py)"}
+  - {host: pc, kind: unit, name: daily-git.timer, deploy: systemd/daily-git.timer}
 uses: [host.pc]
 docs:
   - {topic: "how it works", path: README.md}

@@ -1,0 +1,10 @@
+[Unit]
+Description=Daily-Git: run once a day even without a fresh login
+
+[Timer]
+OnCalendar=*-*-* 10:00
+RandomizedDelaySec=30min
+Persistent=true
+
+[Install]
+WantedBy=timers.target

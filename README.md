@@ -22,7 +22,7 @@ change — the repository exists to produce contribution activity.
 Four layers, each of which must succeed for a commit to happen:
 
 ```
-GNOME session start
+GNOME session start, or daily-git.timer (10:00, systemd user)
   └─ ~/.config/autostart/daily-git-commit.desktop     autostart entry
        └─ ~/.local/bin/daily-git-commit.sh            launcher (mkdir, cd, exec)
             └─ daily_runner.py                       scheduling + staggering
@@ -102,7 +102,17 @@ Desktop Entry spec reserves (`'`, `&`, `>`). See *Troubleshooting*.
    `Exec` must be an absolute path — `~` and `$HOME` are not expanded in a `.desktop`
    file.
 
-6. Validate the entry and dry-run the launcher:
+6. Install the daily timer, so days without a fresh login (the PC left on overnight)
+   still get their commits. It needs `loginctl enable-linger $USER`; whichever of the
+   timer and the login run starts first does the day, the other exits.
+
+   ```bash
+   cp systemd/daily-git.service systemd/daily-git.timer ~/.config/systemd/user/
+   systemctl --user daemon-reload
+   systemctl --user enable --now daily-git.timer
+   ```
+
+7. Validate the entry and dry-run the launcher:
 
    ```bash
    desktop-file-validate ~/.config/autostart/daily-git-commit.desktop   # silent = valid
@@ -123,7 +133,9 @@ Desktop Entry spec reserves (`'`, `&`, `>`). See *Troubleshooting*.
 | `~/.local/bin/daily-git-commit.sh` | Launcher — outside the repo |
 | `~/.config/autostart/daily-git-commit.desktop` | Autostart entry — outside the repo |
 | `~/.local/share/daily-git-commit/log.txt` | Runtime log — outside the repo |
+| `systemd/daily-git.{service,timer}` | Daily 10:00 run, copied to `~/.config/systemd/user/` |
 | `/tmp/daily-git-commit.lock` | Once-per-day marker — cleared on reboot |
+| `/tmp/daily-git-commit.running` | flock held while a run is in progress |
 
 ## Monitoring
 
